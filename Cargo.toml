@@ -1,0 +1,9 @@
+[package]
+name = "chines_searcher"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+chinese-validator = "0.1.0"
+chinese-validator-core = "0.1.0"
+chinese-validator-derive = "0.1.0"
