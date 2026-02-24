@@ -1,0 +1,45 @@
+name: Daily Crate Download
+
+# 定时触发配置
+on:
+  schedule:
+    # 每天 UTC 时间 0 点运行（北京时间上午 8 点）
+    - cron: '0 0 * * *'
+  # 同时支持手动触发（方便测试）
+  workflow_dispatch:
+
+jobs:
+  build:
+    # 使用最新的 Ubuntu 环境
+    runs-on: ubuntu-latest
+    
+    steps:
+      # 步骤1：检出代码
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      # 步骤2：安装 Rust 工具链
+      - name: Install Rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+      
+      # 步骤3：显示 Cargo 版本（可选，用于调试）
+      - name: Show Cargo version
+        run: cargo --version
+      
+      # 步骤4：清理 Cargo 缓存（确保每次都重新下载）
+      - name: Clear cargo cache for this crate
+        run: |
+          # 删除特定 crate 的缓存（让下次构建必须重新下载）
+          rm -rf ~/.cargo/registry/cache/github.com-*/chinese-validator-*
+          rm -rf ~/.cargo/registry/src/github.com-*/chinese-validator-*
+        continue-on-error: true  # 如果缓存不存在也不报错
+      
+      # 步骤5：构建项目（这一步会下载您的 crate）
+      - name: Build project
+        run: cargo build --verbose
+      
+      # 步骤6：运行（可选）
+      - name: Run project
+        run: cargo run --verbose
