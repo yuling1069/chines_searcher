@@ -4,7 +4,8 @@ name: Daily Crate Download
 on:
   schedule:
     # 每天 UTC 时间 0 点运行（北京时间上午 8 点）
-    - cron: '0 0 * * *'
+    # - cron: '0 0 * * *'
+    - cron: '0 0,12 * * *'  # 每天 UTC 0 点和 12 点运行（北京时间 8 点和 20 点）
   # 同时支持手动触发（方便测试）
   workflow_dispatch:
 
@@ -12,7 +13,10 @@ jobs:
   build:
     # 使用最新的 Ubuntu 环境
     runs-on: ubuntu-latest
-    
+     strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]  # 三个平台同时运行
+
     steps:
       # 步骤1：检出代码
       - name: Checkout repository
