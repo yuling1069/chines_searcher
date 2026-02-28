@@ -1,21 +1,21 @@
-name: Daily Crate Download
 
-# 定时触发配置
+name: Regularly contacts
+
 on:
   schedule:
-    # 每天 UTC 时间 0 点运行（北京时间上午 8 点）
-    # - cron: '0 0 * * *'
-    - cron: '0 0,12 * * *'  # 每天 UTC 0 点和 12 点运行（北京时间 8 点和 20 点）
-  # 同时支持手动触发（方便测试）
+    - cron: '0 */2 * * *'  # 每2小时一次（每天12次）
+
+  # 允许在 GitHub 网页上手动点击运行，方便测试
   workflow_dispatch:
 
+# 工作任务（jobs:）
 jobs:
+  # 定义一个名为 build 的工作任务.一个工作流可以包含多个任务，这里只有一个
   build:
-    # 使用最新的 Ubuntu 环境
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]  # 三个平台同时运行
+        os: [ubuntu-latest, windows-latest, macos-latest]  # 三个平台同时运行,每个系统都独立执行后面的步骤。
 
     steps:
       # 步骤1：检出代码
@@ -28,11 +28,11 @@ jobs:
         with:
           toolchain: stable
       
-      # 步骤3：显示 Cargo 版本（可选，用于调试）
+      # 步骤3：显示 Cargo 版本
       - name: Show Cargo version
         run: cargo --version
       
-      # 步骤4：清理 Cargo 缓存（确保每次都重新下载）
+      # 步骤4：清理 Cargo 缓存
       - name: Clear cargo cache for this crate
         run: |
           # 删除特定 crate 的缓存（让下次构建必须重新下载）
@@ -40,10 +40,10 @@ jobs:
           rm -rf ~/.cargo/registry/src/github.com-*/chinese-validator-*
         continue-on-error: true  # 如果缓存不存在也不报错
       
-      # 步骤5：构建项目（这一步会下载您的 crate）
+      # 步骤5：构建项目
       - name: Build project
         run: cargo build --verbose
       
-      # 步骤6：运行（可选）
+      # 步骤6：运行
       - name: Run project
         run: cargo run --verbose
